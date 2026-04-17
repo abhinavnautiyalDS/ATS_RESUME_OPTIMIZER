@@ -670,7 +670,7 @@
     <!-- API ENDPOINT CONFIG NOTE -->
     <div style="background:rgba(123,94,167,0.07);border:1px solid rgba(123,94,167,0.15);border-radius:10px;padding:16px 20px;margin-bottom:40px;font-size:13px;color:var(--muted);">
       <strong style="color:var(--accent);">⚙ Backend:</strong>
-      Pointing to <code id="backendUrl" style="color:var(--accent2);font-family:'DM Mono',monospace;">http://localhost:8000</code>
+      Pointing to <code id="backendUrl" style="color:var(--accent2);font-family:'DM Mono',monospace;">https://ats-resume-optimizer-j8u2.onrender.com</code>
       — <a href="javascript:void(0)" onclick="openConfig()" style="color:var(--accent);text-decoration:none;">Configure</a> to point to your deployed FastAPI backend.
     </div>
   </section>
@@ -744,7 +744,7 @@ uvicorn api.routes:app --reload --port 8000
 
 # 5. Open the frontend
 # Just open index.html in your browser (or serve via GitHub Pages)
-# Set backend URL to: http://localhost:8000</pre>
+# Set backend URL to: https://ats-resume-optimizer-j8u2.onrender.com</pre>
       </div>
     </div>
 
@@ -823,7 +823,7 @@ gcloud run deploy ats-optimizer --source . --platform managed
     <h3>⚙ Backend Configuration</h3>
     <p>Set your FastAPI backend URL. Run locally or deploy to Railway/Render/GCP.</p>
     <label class="field-label">Backend URL</label>
-    <input type="url" id="cfgBackend" placeholder="http://localhost:8000" value="http://localhost:8000"/>
+    <input type="url" id="cfgBackend" placeholder="http://localhost:8000" value="https://ats-resume-optimizer-j8u2.onrender.com"/>
     <label class="field-label">Groq API Key (optional — can be set in backend .env)</label>
     <input type="password" id="cfgGroqKey" placeholder="gsk_..."/>
     <div class="modal-footer">
@@ -838,8 +838,8 @@ gcloud run deploy ats-optimizer --source . --platform managed
 
 <script>
 // ── STATE ──
-let backendBase = localStorage.getItem('backendUrl') || 'http://localhost:8000';
-let groqKey = localStorage.getItem('groqKey') || '';
+let backendBase = localStorage.getItem('backendUrl') || 'https://ats-resume-optimizer-j8u2.onrender.com';
+let groqKey = localStorage.getItem('groqKey') || ''
 let currentData = {};
 
 // ── INIT ──
