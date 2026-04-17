@@ -18,7 +18,8 @@ class Settings(BaseSettings):
     LLM_PROVIDER: str = Field(default="huggingface", description="LLM backend provider")
 
     # HuggingFace Inference API (free tier available)
-    HF_API_TOKEN: str = Field(default="", description="HuggingFace API token")
+ 
+    HF_API_TOKEN: str = Field(default="")
     HF_API_URL: str = Field(
         default="https://api-inference.huggingface.co/models",
         description="HuggingFace Inference API base URL",
@@ -35,7 +36,8 @@ class Settings(BaseSettings):
     )
 
     # Groq (free-tier cloud inference for open-source models)
-    GROQ_API_KEY: str = Field(default="", description="Groq API key (free tier)")
+    GROQ_API_KEY: str = Field(default="")
+
     GROQ_API_URL: str = Field(
         default="https://api.groq.com/openai/v1/chat/completions",
         description="Groq OpenAI-compatible endpoint",
