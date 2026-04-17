@@ -941,7 +941,7 @@ async function startPipeline() {
     addLog('Uploading resume: ' + resumeFile.name);
 
     const formData = new FormData();
-    formData.append('resume', resumeFile);
+    formData.append('resume', resume_file);
     if (jdFile) {
       formData.append('job_description', jdFile);
       addLog('Uploading JD: ' + jdFile.name);
@@ -964,7 +964,7 @@ async function startPipeline() {
     setPipeStep(3); setStatus('Analyzing ATS compatibility...');
     addLog('Extracting JD keywords, skills, responsibilities...');
 
-    const response = await fetch(backendBase + '/api/v1/process', {
+    const response = await fetch(backendBase + '/api/v1/optimize', {
       method: 'POST',
       body: formData
     });
