@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ATS Resume Optimizer — AI-Powered Career Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: rgba(255,255,255,0.07);
+    --accent: #7b5ea7;
+    --accent2: #4ecdc4;
+    --accent3: #ff6b6b;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --score-green: #4ade80;
+    --score-yellow: #fbbf24;
+    --score-red: #f87171;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE GRAIN OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999; opacity: 0.3;
+  }
+
+  /* ── AMBIENT GLOW ── */
+  .ambient {
+    position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0;
+  }
+  .ambient-1 { width: 600px; height: 600px; background: rgba(123,94,167,0.12); top: -200px; left: -100px; }
+  .ambient-2 { width: 500px; height: 500px; background: rgba(78,205,196,0.08); bottom: -100px; right: -100px; }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 0;
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(20px);
+    background: rgba(10,10,15,0.85);
+  }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .logo span { color: var(--accent2); }
+  nav { display: flex; gap: 8px; }
+  nav a {
+    color: var(--muted); text-decoration: none; font-size: 13px;
+    padding: 6px 14px; border-radius: 6px;
+    transition: all 0.2s;
+    font-family: 'DM Mono', monospace;
+  }
+  nav a:hover, nav a.active { color: var(--text); background: var(--surface2); }
+
+  /* ── HERO ── */
+  .hero { padding: 80px 0 60px; text-align: center; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(123,94,167,0.15); border: 1px solid rgba(123,94,167,0.3);
+    color: #b899e0; font-size: 12px; padding: 5px 14px; border-radius: 20px;
+    font-family: 'DM Mono', monospace; letter-spacing: 0.05em;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-badge::before { content: '●'; color: var(--accent2); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(38px, 6vw, 72px);
+    font-weight: 800; line-height: 1.05;
+    letter-spacing: -0.03em;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+  h1 em { font-style: normal; color: var(--accent2); }
+  h1 .strike {
+    position: relative; color: var(--muted);
+    text-decoration: line-through; text-decoration-color: var(--accent3);
+  }
+
+  .hero-sub {
+    color: var(--muted); font-size: 17px; max-width: 520px;
+    margin: 20px auto 40px;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(20px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  /* ── PIPELINE STEPPER ── */
+  .pipeline {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; flex-wrap: wrap;
+    margin-bottom: 50px;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+  .pipe-step {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 8px 16px; border-radius: 6px;
+    font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted);
+    transition: all 0.3s;
+  }
+  .pipe-step.active { border-color: var(--accent); color: var(--text); background: rgba(123,94,167,0.1); }
+  .pipe-step.done { border-color: var(--accent2); color: var(--accent2); }
+  .pipe-arrow { color: var(--muted); font-size: 12px; padding: 0 6px; }
+  .pipe-step .num {
+    width: 20px; height: 20px; border-radius: 4px;
+    background: var(--surface2); display: flex; align-items: center; justify-content: center;
+    font-size: 10px; flex-shrink: 0;
+  }
+  .pipe-step.active .num { background: var(--accent); color: white; }
+  .pipe-step.done .num { background: var(--accent2); color: #0a0a0f; }
+
+  /* ── MAIN CARD ── */
+  .app-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden;
+    margin-bottom: 40px;
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+  .card-tabs {
+    display: flex; border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .tab-btn {
+    padding: 14px 22px; background: none; border: none;
+    color: var(--muted); cursor: pointer; font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--text); border-bottom-color: var(--accent2); }
+  .tab-icon { font-size: 14px; }
+
+  .tab-content { display: none; padding: 32px; }
+  .tab-content.active { display: block; }
+
+  /* ── UPLOAD ZONE ── */
+  .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  @media(max-width:640px) { .upload-grid { grid-template-columns: 1fr; } }
+
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px; padding: 32px 20px;
+    text-align: center; cursor: pointer;
+    transition: all 0.3s; position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent); background: rgba(123,94,167,0.05);
+  }
+  .upload-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%;
+  }
+  .upload-icon { font-size: 32px; margin-bottom: 10px; }
+  .upload-label {
+    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .upload-sub { color: var(--muted); font-size: 12px; font-family: 'DM Mono', monospace; }
+  .upload-filename {
+    margin-top: 10px; font-size: 12px; color: var(--accent2);
+    font-family: 'DM Mono', monospace; display: none;
+  }
+
+  /* ── TEXTAREA ── */
+  textarea {
+    width: 100%; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-family: 'DM Mono', monospace;
+    font-size: 13px; padding: 16px; resize: vertical;
+    min-height: 140px; transition: border-color 0.2s;
+    outline: none;
+  }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--muted); }
+
+  label.field-label {
+    display: block; font-size: 12px; font-family: 'DM Mono', monospace;
+    color: var(--muted); margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+
+  .field-group { margin-bottom: 20px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 24px; border-radius: 8px;
+    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.2s; text-decoration: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #5b3f8a);
+    color: white;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(123,94,167,0.3); }
+  .btn-secondary {
+    background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent); }
+  .btn-teal {
+    background: linear-gradient(135deg, var(--accent2), #2ba89e);
+    color: #0a0a0f;
+  }
+  .btn-teal:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(78,205,196,0.3); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+  /* ── LOADING ── */
+  .spinner {
+    width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: white; border-radius: 50%;
+    animation: spin 0.7s linear infinite; display: none;
+  }
+  .spinner.visible { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RESULTS SECTION ── */
+  #results { display: none; }
+  #results.show { display: block; animation: fadeUp 0.5s ease; }
+
+  /* ── SCORE CARD ── */
+  .score-banner {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 28px;
+    display: flex; align-items: center; gap: 28px;
+    margin-bottom: 24px; flex-wrap: wrap;
+  }
+  .score-ring {
+    position: relative; width: 90px; height: 90px; flex-shrink: 0;
+  }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring-text {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .score-num { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; }
+  .score-lbl { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .score-info { flex: 1; min-width: 200px; }
+  .score-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .score-desc { color: var(--muted); font-size: 13px; }
+
+  .kw-grid { display: flex; gap: 24px; flex-wrap: wrap; }
+  .kw-col { flex: 1; min-width: 200px; }
+  .kw-col h4 {
+    font-size: 11px; font-family: 'DM Mono', monospace;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+  .kw-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; padding: 4px 10px; border-radius: 4px;
+    font-family: 'DM Mono', monospace; margin: 3px 2px;
+  }
+  .kw-tag.match { background: rgba(74,222,128,0.1); color: var(--score-green); border: 1px solid rgba(74,222,128,0.2); }
+  .kw-tag.miss { background: rgba(248,113,113,0.1); color: var(--score-red); border: 1px solid rgba(248,113,113,0.2); }
+
+  /* ── OUTPUT CARDS ── */
+  .output-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  @media(max-width:720px){ .output-grid { grid-template-columns: 1fr; } }
+
+  .out-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+  }
+  .out-card-head {
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .out-card-title {
+    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .out-card-body { padding: 18px; }
+
+  pre.code-view {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    color: var(--muted); white-space: pre-wrap; word-break: break-word;
+    max-height: 280px; overflow-y: auto; line-height: 1.7;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+  /* ── DOWNLOAD BAR ── */
+  .download-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(78,205,196,0.07); border: 1px solid rgba(78,205,196,0.2);
+    border-radius: 10px; padding: 16px 20px; gap: 16px; flex-wrap: wrap;
+    margin-bottom: 30px;
+  }
+  .download-bar p { font-size: 13px; color: var(--muted); }
+  .download-bar strong { color: var(--accent2); }
+
+  /* ── STATUS LOG ── */
+  .status-log {
+    background: #0d0d14; border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px;
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    max-height: 180px; overflow-y: auto;
+    margin-bottom: 24px; display: none;
+  }
+  .status-log.show { display: block; }
+  .log-line { padding: 3px 0; display: flex; gap: 10px; }
+  .log-line .ts { color: var(--muted); }
+  .log-line .msg { color: var(--accent2); }
+  .log-line.error .msg { color: var(--score-red); }
+  .log-line.warn .msg { color: var(--score-yellow); }
+
+  /* ── SECTION HEADERS ── */
+  .section-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 20px;
+  }
+  .section-head h2 {
+    font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700;
+  }
+  .section-badge {
+    font-size: 11px; font-family: 'DM Mono', monospace;
+    padding: 3px 10px; border-radius: 4px;
+    background: rgba(123,94,167,0.15); color: var(--accent);
+    border: 1px solid rgba(123,94,167,0.2);
+  }
+
+  /* ── FEATURES SECTION ── */
+  .features { padding: 60px 0; border-top: 1px solid var(--border); }
+  .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .feat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px;
+    transition: all 0.3s;
+  }
+  .feat-card:hover { border-color: rgba(123,94,167,0.4); transform: translateY(-2px); }
+  .feat-icon { font-size: 28px; margin-bottom: 14px; }
+  .feat-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .feat-desc { color: var(--muted); font-size: 13px; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 0; text-align: center;
+    color: var(--muted); font-size: 12px; font-family: 'DM Mono', monospace;
+  }
+  footer a { color: var(--accent2); text-decoration: none; }
+
+  /* ── API CONFIG MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+    z-index: 1000; align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 36px; max-width: 480px; width: 90%;
+    animation: fadeUp 0.3s ease;
+  }
+  .modal h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .modal p { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  input[type=text], input[type=password], input[type=url] {
+    width: 100%; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-family: 'DM Mono', monospace;
+    font-size: 13px; padding: 12px 14px; outline: none;
+    transition: border-color 0.2s; margin-bottom: 14px;
+  }
+  input:focus { border-color: var(--accent); }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+
+  /* ── LIVE SCORE BAR ── */
+  .live-score-bar {
+    height: 4px; background: var(--surface2);
+    border-radius: 2px; overflow: hidden; margin-top: 10px;
+  }
+  .live-score-fill {
+    height: 100%; border-radius: 2px;
+    transition: width 1s ease, background 0.5s ease;
+    background: var(--score-green);
+  }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 12px 20px; border-radius: 8px;
+    font-size: 13px; z-index: 2000;
+    transform: translateY(60px); opacity: 0;
+    transition: all 0.3s; font-family: 'DM Mono', monospace;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: var(--accent2); color: var(--accent2); }
+  .toast.error { border-color: var(--score-red); color: var(--score-red); }
+
+  /* ── SECTION DIVIDERS ── */
+  .divider { height: 1px; background: var(--border); margin: 8px 0 24px; }
+
+  select {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); padding: 10px 14px;
+    font-family: 'DM Mono', monospace; font-size: 13px; outline: none;
+    transition: border-color 0.2s; cursor: pointer;
+  }
+  select:focus { border-color: var(--accent); }
+
+  .config-row { display: flex; gap: 12px; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap; }
+  .config-row .field-group { margin-bottom: 0; flex: 1; min-width: 180px; }
+</style>
+</head>
+<body>
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="container header-inner">
+    <div class="logo">
+      <div class="logo-icon">📄</div>
+      ATS<span>Optimizer</span>
+    </div>
+    <nav>
+      <a href="#app" class="active" onclick="showSection('app',this)">Optimizer</a>
+      <a href="#features" onclick="showSection('features',this)">Features</a>
+      <a href="#setup" onclick="showSection('setup',this)">Setup</a>
+      <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;" onclick="openConfig()">⚙ Config</button>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="container">
+  <section class="hero">
+    <div class="hero-badge">AI-POWERED PIPELINE · ATS COMPATIBLE</div>
+    <h1>Stop Getting <span class="strike">Rejected</span><br>by <em>Machines</em></h1>
+    <p class="hero-sub">Upload your resume and job description. Our AI analyzes, scores, optimizes, and generates an ATS-perfect resume + cover letter in seconds.</p>
+
+    <!-- PIPELINE STEPS -->
+    <div class="pipeline" id="pipelineSteps">
+      <div class="pipe-step active" id="ps1"><span class="num">1</span> Upload</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step" id="ps2"><span class="num">2</span> Parse</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step" id="ps3"><span class="num">3</span> Analyze</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step" id="ps4"><span class="num">4</span> Score</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step" id="ps5"><span class="num">5</span> Optimize</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step" id="ps6"><span class="num">6</span> Generate</div>
+    </div>
+  </section>
+
+  <!-- APP SECTION -->
+  <section id="app">
+    <div class="app-card">
+      <div class="card-tabs">
+        <button class="tab-btn active" onclick="switchTab('input',this)"><span class="tab-icon">📤</span> Input</button>
+        <button class="tab-btn" onclick="switchTab('analysis',this)" id="tabAnalysis"><span class="tab-icon">🔍</span> Analysis</button>
+        <button class="tab-btn" onclick="switchTab('resume',this)" id="tabResume"><span class="tab-icon">📝</span> Resume</button>
+        <button class="tab-btn" onclick="switchTab('cover',this)" id="tabCover"><span class="tab-icon">✉️</span> Cover Letter</button>
+      </div>
+
+      <!-- INPUT TAB -->
+      <div class="tab-content active" id="tab-input">
+        <div class="upload-grid">
+          <div>
+            <label class="field-label">Your Resume (DOCX / PDF)</label>
+            <div class="upload-zone" id="resumeZone" ondragover="handleDrag(event,'resumeZone')" ondragleave="handleDragLeave(event,'resumeZone')" ondrop="handleDrop(event,'resumeFile','resumeZone')">
+              <input type="file" id="resumeFile" accept=".pdf,.docx,.doc" onchange="showFileName('resumeFile','resumeName')">
+              <div class="upload-icon">📄</div>
+              <div class="upload-label">Drop resume here</div>
+              <div class="upload-sub">PDF or DOCX · Max 5MB</div>
+              <div class="upload-filename" id="resumeName"></div>
+            </div>
+          </div>
+          <div>
+            <label class="field-label">Job Description (DOCX / PDF / Text)</label>
+            <div class="upload-zone" id="jdZone" ondragover="handleDrag(event,'jdZone')" ondragleave="handleDragLeave(event,'jdZone')" ondrop="handleDrop(event,'jdFile','jdZone')">
+              <input type="file" id="jdFile" accept=".pdf,.docx,.doc,.txt" onchange="showFileName('jdFile','jdName')">
+              <div class="upload-icon">💼</div>
+              <div class="upload-label">Drop job description</div>
+              <div class="upload-sub">PDF, DOCX, or TXT</div>
+              <div class="upload-filename" id="jdName"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Or paste job description directly</label>
+          <textarea id="jdText" placeholder="Paste the full job description here...&#10;&#10;Include required skills, responsibilities, qualifications..."></textarea>
+        </div>
+
+        <div class="config-row">
+          <div class="field-group">
+            <label class="field-label">LLM Provider</label>
+            <select id="llmProvider">
+              <option value="groq">Groq (Free · Fast)</option>
+              <option value="ollama">Ollama (Local)</option>
+              <option value="huggingface">HuggingFace Inference</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Model</label>
+            <select id="llmModel">
+              <option value="llama-3.1-70b-versatile">llama-3.1-70b-versatile</option>
+              <option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
+              <option value="mixtral-8x7b-32768">mixtral-8x7b-32768</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Output Format</label>
+            <select id="outputFmt">
+              <option value="docx">DOCX (Recommended)</option>
+              <option value="text">Plain Text</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="analyzeBtn" onclick="startPipeline()">
+            <div class="spinner" id="spinner"></div>
+            <span id="analyzeBtnText">🚀 Analyze & Optimize</span>
+          </button>
+          <button class="btn btn-secondary" onclick="resetAll()">↺ Reset</button>
+          <span id="statusText" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);"></span>
+        </div>
+      </div>
+
+      <!-- ANALYSIS TAB -->
+      <div class="tab-content" id="tab-analysis">
+        <div class="section-head">
+          <h2>ATS Analysis</h2>
+          <span class="section-badge" id="scoreBadge">—</span>
+        </div>
+
+        <div class="score-banner" id="scoreBanner">
+          <div class="score-ring">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
+              <circle cx="45" cy="45" r="38" fill="none" stroke="var(--accent2)" stroke-width="8"
+                stroke-dasharray="239" stroke-dashoffset="239" id="scoreCircle"
+                stroke-linecap="round" style="transition:stroke-dashoffset 1.2s ease"/>
+            </svg>
+            <div class="score-ring-text">
+              <span class="score-num" id="scoreNum">—</span>
+              <span class="score-lbl">ATS Score</span>
+            </div>
+          </div>
+          <div class="score-info">
+            <div class="score-title" id="scoreTitle">Run the pipeline first</div>
+            <div class="score-desc" id="scoreDesc">Upload your resume and job description, then click Analyze.</div>
+            <div class="live-score-bar"><div class="live-score-fill" id="scoreBar" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <div class="kw-grid" id="kwGrid">
+          <div class="kw-col">
+            <h4>✅ Matched Keywords</h4>
+            <div id="kwMatched"><span style="color:var(--muted);font-size:12px;font-family:'DM Mono',monospace;">Run analysis to see results</span></div>
+          </div>
+          <div class="kw-col">
+            <h4>❌ Missing Keywords</h4>
+            <div id="kwMissing"><span style="color:var(--muted);font-size:12px;font-family:'DM Mono',monospace;">Run analysis to see results</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESUME TAB -->
+      <div class="tab-content" id="tab-resume">
+        <div class="section-head">
+          <h2>Optimized Resume</h2>
+          <span class="section-badge">ATS-READY</span>
+        </div>
+
+        <div class="status-log" id="resumeLog"></div>
+
+        <div class="out-card" style="margin-bottom:20px;">
+          <div class="out-card-head">
+            <div class="out-card-title">📝 Generated Content</div>
+            <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;" onclick="copyText('resumeContent')">Copy</button>
+          </div>
+          <div class="out-card-body">
+            <pre class="code-view" id="resumeContent">Resume will appear here after optimization...</pre>
+          </div>
+        </div>
+
+        <div class="download-bar" id="resumeDownloadBar" style="display:none">
+          <div>
+            <strong>✅ Resume ready for download</strong>
+            <p>ATS-optimized · Standard sections · No tables or columns</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-teal" onclick="downloadFile('resume')">⬇ Download DOCX</button>
+            <button class="btn btn-secondary" onclick="downloadFile('resume','txt')">⬇ TXT</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- COVER LETTER TAB -->
+      <div class="tab-content" id="tab-cover">
+        <div class="section-head">
+          <h2>Cover Letter</h2>
+          <span class="section-badge">TAILORED</span>
+        </div>
+
+        <div class="out-card" style="margin-bottom:20px;">
+          <div class="out-card-head">
+            <div class="out-card-title">✉️ Generated Cover Letter</div>
+            <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;" onclick="copyText('coverContent')">Copy</button>
+          </div>
+          <div class="out-card-body">
+            <pre class="code-view" id="coverContent">Cover letter will appear here after optimization...</pre>
+          </div>
+        </div>
+
+        <div class="download-bar" id="coverDownloadBar" style="display:none">
+          <div>
+            <strong>✅ Cover letter ready</strong>
+            <p>Tailored to job description · Professional tone</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-teal" onclick="downloadFile('cover')">⬇ Download DOCX</button>
+            <button class="btn btn-secondary" onclick="downloadFile('cover','txt')">⬇ TXT</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- API ENDPOINT CONFIG NOTE -->
+    <div style="background:rgba(123,94,167,0.07);border:1px solid rgba(123,94,167,0.15);border-radius:10px;padding:16px 20px;margin-bottom:40px;font-size:13px;color:var(--muted);">
+      <strong style="color:var(--accent);">⚙ Backend:</strong>
+      Pointing to <code id="backendUrl" style="color:var(--accent2);font-family:'DM Mono',monospace;">http://localhost:8000</code>
+      — <a href="javascript:void(0)" onclick="openConfig()" style="color:var(--accent);text-decoration:none;">Configure</a> to point to your deployed FastAPI backend.
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="section-head">
+      <h2>What's Inside</h2>
+      <span class="section-badge">6 MODULES</span>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon">🔍</div>
+        <div class="feat-title">Smart Parser</div>
+        <div class="feat-desc">Extracts phone, email, LinkedIn, GitHub, skills, work history, education and achievements from PDF/DOCX automatically.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎯</div>
+        <div class="feat-title">ATS Gap Analyzer</div>
+        <div class="feat-desc">Compares resume content against the JD. Identifies missing keywords, skills, and technologies. Generates a compatibility score.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">Resume Optimizer</div>
+        <div class="feat-desc">Rewrites bullets for impact. Integrates missing keywords naturally. Keeps achievements measurable. Avoids fabrication.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📝</div>
+        <div class="feat-title">ATS Resume Generator</div>
+        <div class="feat-desc">Outputs clean DOCX — no tables, no columns, standard headings. Bullet points for experience, clean layout for scanners.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">✉️</div>
+        <div class="feat-title">Cover Letter Engine</div>
+        <div class="feat-desc">Tailors cover letters using resume info + job description. Professional FastAPI DOCX output ready to attach.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🤖</div>
+        <div class="feat-title">Multi-LLM Support</div>
+        <div class="feat-desc">Works with Groq (free), Ollama (local), and HuggingFace Inference. No vendor lock-in. Switch providers anytime.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETUP GUIDE -->
+  <section id="setup" style="padding:60px 0;border-top:1px solid var(--border);">
+    <div class="section-head">
+      <h2>Setup Guide</h2>
+      <span class="section-badge">LOCAL + DEPLOY</span>
+    </div>
+    <div class="out-card">
+      <div class="out-card-head">
+        <div class="out-card-title">🖥 Run Locally</div>
+      </div>
+      <div class="out-card-body">
+        <pre class="code-view"># 1. Clone the repository
+git clone https://github.com/YOUR_USERNAME/ats-resume-optimizer
+cd ats-resume-optimizer
+
+# 2. Set up Python environment
+python -m venv venv
+source venv/bin/activate    # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# 3. Configure environment
+cp .env.example .env
+# Edit .env → add your GROQ_API_KEY (free at console.groq.com)
+
+# 4. Start the backend
+uvicorn api.routes:app --reload --port 8000
+
+# 5. Open the frontend
+# Just open index.html in your browser (or serve via GitHub Pages)
+# Set backend URL to: http://localhost:8000</pre>
+      </div>
+    </div>
+
+    <div class="out-card" style="margin-top:16px;">
+      <div class="out-card-head">
+        <div class="out-card-title">🌐 Deploy to GitHub Pages + Cloud</div>
+      </div>
+      <div class="out-card-body">
+        <pre class="code-view"># FRONTEND (GitHub Pages)
+# 1. Push index.html to your repo's /docs folder or root
+# 2. Go to Settings → Pages → Source: main branch / root
+# 3. Your app will be live at: https://username.github.io/ats-resume-optimizer
+
+# BACKEND OPTIONS:
+# Option A: Railway (recommended)
+railway login
+railway init
+railway up
+# Gets you a public URL like: https://ats-optimizer.up.railway.app
+
+# Option B: Render.com (free tier)
+# Connect GitHub repo → New Web Service → uvicorn api.routes:app --host 0.0.0.0
+
+# Option C: Google Cloud Run
+gcloud run deploy ats-optimizer --source . --platform managed
+
+# After deploying: click ⚙ Config (top right) and paste your backend URL</pre>
+      </div>
+    </div>
+
+    <div class="out-card" style="margin-top:16px;">
+      <div class="out-card-head">
+        <div class="out-card-title">📁 Project Structure</div>
+      </div>
+      <div class="out-card-body">
+        <pre class="code-view">ats-resume-optimizer/
+├── core/
+│   ├── config.py          # Pydantic settings (.env loader)
+│   ├── llm_client.py      # Groq / Ollama / HuggingFace provider
+│   └── pipeline.py        # Main orchestrator (all 6 stages)
+├── modules/
+│   ├── resume_parser.py   # PDF+DOCX → structured JSON
+│   ├── jd_analyzer.py     # JD → skills, keywords, responsibilities
+│   ├── ats_scorer.py      # Hybrid keyword + LLM ATS score
+│   ├── resume_optimizer.py# LLM rewrites bullets, adds keywords
+│   ├── docx_generator.py  # ATS-safe DOCX (no tables/columns)
+│   └── cover_letter_generator.py
+├── prompts/
+│   └── templates.py       # All LLM prompts centralized
+├── models/
+│   └── schemas.py         # 10 Pydantic models
+├── api/
+│   └── routes.py          # FastAPI endpoints
+├── tests/
+│   └── test_pipeline.py   # Unit + integration tests
+├── index.html             # THIS FILE (GitHub Pages frontend)
+├── requirements.txt
+├── .env.example
+└── README.md</pre>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p>ATS Resume Optimizer · Built with FastAPI, Python, Groq · Hosted on GitHub Pages</p>
+    <p style="margin-top:6px;">Backend: <a href="https://docs.anthropic.com" target="_blank">FastAPI</a> · LLM: <a href="https://console.groq.com" target="_blank">Groq</a> · <a href="javascript:void(0)" onclick="openConfig()">Configure Backend URL</a></p>
+  </div>
+</footer>
+
+<!-- CONFIG MODAL -->
+<div class="modal-overlay" id="configModal">
+  <div class="modal">
+    <h3>⚙ Backend Configuration</h3>
+    <p>Set your FastAPI backend URL. Run locally or deploy to Railway/Render/GCP.</p>
+    <label class="field-label">Backend URL</label>
+    <input type="url" id="cfgBackend" placeholder="http://localhost:8000" value="http://localhost:8000"/>
+    <label class="field-label">Groq API Key (optional — can be set in backend .env)</label>
+    <input type="password" id="cfgGroqKey" placeholder="gsk_..."/>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeConfig()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveConfig()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let backendBase = localStorage.getItem('backendUrl') || 'http://localhost:8000';
+let groqKey = localStorage.getItem('groqKey') || '';
+let currentData = {};
+
+// ── INIT ──
+document.getElementById('backendUrl').textContent = backendBase;
+document.getElementById('cfgBackend').value = backendBase;
+
+// ── TABS ──
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── SECTIONS (nav) ──
+function showSection(id, el) {
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  el.classList.add('active');
+  const t = document.getElementById(id);
+  if (t) t.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── DRAG & DROP ──
+function handleDrag(e, zoneId) {
+  e.preventDefault();
+  document.getElementById(zoneId).classList.add('drag-over');
+}
+function handleDragLeave(e, zoneId) {
+  document.getElementById(zoneId).classList.remove('drag-over');
+}
+function handleDrop(e, inputId, zoneId) {
+  e.preventDefault();
+  document.getElementById(zoneId).classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  const input = document.getElementById(inputId);
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change'));
+}
+
+function showFileName(inputId, nameId) {
+  const f = document.getElementById(inputId).files[0];
+  const el = document.getElementById(nameId);
+  if (f) { el.textContent = '📎 ' + f.name; el.style.display = 'block'; }
+}
+
+// ── PIPELINE PROGRESS ──
+function setPipeStep(n) {
+  for (let i = 1; i <= 6; i++) {
+    const el = document.getElementById('ps' + i);
+    el.classList.remove('active', 'done');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+  }
+}
+
+// ── LOG ──
+function addLog(msg, type='') {
+  const log = document.getElementById('resumeLog');
+  log.classList.add('show');
+  const ts = new Date().toLocaleTimeString('en-US', {hour12:false});
+  const line = document.createElement('div');
+  line.className = 'log-line ' + type;
+  line.innerHTML = `<span class="ts">[${ts}]</span><span class="msg">${msg}</span>`;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+
+// ── STATUS ──
+function setStatus(msg) {
+  document.getElementById('statusText').textContent = msg;
+}
+
+// ── MAIN PIPELINE ──
+async function startPipeline() {
+  const resumeFile = document.getElementById('resumeFile').files[0];
+  const jdFile = document.getElementById('jdFile').files[0];
+  const jdText = document.getElementById('jdText').value.trim();
+
+  if (!resumeFile) { showToast('Please upload your resume (PDF or DOCX)', 'error'); return; }
+  if (!jdFile && !jdText) { showToast('Please upload or paste a job description', 'error'); return; }
+
+  const btn = document.getElementById('analyzeBtn');
+  const spinner = document.getElementById('spinner');
+  const btnText = document.getElementById('analyzeBtnText');
+
+  btn.disabled = true;
+  spinner.classList.add('visible');
+  btnText.textContent = 'Processing...';
+  document.getElementById('resumeLog').innerHTML = '';
+
+  try {
+    // STEP 1: Upload files
+    setPipeStep(1);
+    setStatus('Uploading files...');
+    addLog('Starting ATS optimization pipeline...');
+    addLog('Uploading resume: ' + resumeFile.name);
+
+    const formData = new FormData();
+    formData.append('resume', resumeFile);
+    if (jdFile) {
+      formData.append('job_description', jdFile);
+      addLog('Uploading JD: ' + jdFile.name);
+    }
+    if (jdText) {
+      formData.append('job_description_text', jdText);
+      addLog('Using pasted job description text');
+    }
+    formData.append('llm_provider', document.getElementById('llmProvider').value);
+    formData.append('model', document.getElementById('llmModel').value);
+    formData.append('output_format', document.getElementById('outputFmt').value);
+    if (groqKey) formData.append('groq_api_key', groqKey);
+
+    // STEP 2: Parse
+    setPipeStep(2); setStatus('Parsing documents...');
+    addLog('Parsing resume structure...');
+    await delay(400);
+
+    // STEP 3: Analyze
+    setPipeStep(3); setStatus('Analyzing ATS compatibility...');
+    addLog('Extracting JD keywords, skills, responsibilities...');
+
+    const response = await fetch(backendBase + '/api/v1/process', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ detail: 'Server error' }));
+      throw new Error(err.detail || 'Backend error ' + response.status);
+    }
+
+    const data = await response.json();
+    currentData = data;
+
+    // STEP 4: Score
+    setPipeStep(4); setStatus('Scoring...');
+    addLog('ATS gap analysis complete');
+    animateScore(data.ats_score || 0);
+    renderKeywords(data.matched_keywords || [], data.missing_keywords || []);
+    await delay(300);
+
+    // STEP 5: Optimize
+    setPipeStep(5); setStatus('Optimizing resume...');
+    addLog('Optimizing resume with missing keywords...');
+    await delay(200);
+
+    // STEP 6: Generate
+    setPipeStep(6); setStatus('Generating outputs...');
+    addLog('Generating ATS-safe DOCX resume...');
+    addLog('Generating tailored cover letter...');
+
+    // Populate outputs
+    document.getElementById('resumeContent').textContent = data.optimized_resume || 'No resume content returned.';
+    document.getElementById('coverContent').textContent = data.cover_letter || 'No cover letter returned.';
+
+    // Show download bars
+    if (data.resume_download_url || data.optimized_resume) {
+      document.getElementById('resumeDownloadBar').style.display = 'flex';
+    }
+    if (data.cover_letter_download_url || data.cover_letter) {
+      document.getElementById('coverDownloadBar').style.display = 'flex';
+    }
+
+    addLog('✅ Pipeline complete!', '');
+    setStatus('Done!');
+    showToast('✅ Optimization complete!', 'success');
+
+    // Auto-switch to analysis tab
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-analysis').classList.add('active');
+    document.querySelector('[onclick*="analysis"]').classList.add('active');
+
+  } catch (err) {
+    addLog('❌ Error: ' + err.message, 'error');
+    setStatus('Error');
+    showToast('Error: ' + err.message, 'error');
+    setPipeStep(1);
+  } finally {
+    btn.disabled = false;
+    spinner.classList.remove('visible');
+    btnText.textContent = '🚀 Analyze & Optimize';
+  }
+}
+
+// ── SCORE ANIMATION ──
+function animateScore(score) {
+  const circle = document.getElementById('scoreCircle');
+  const numEl = document.getElementById('scoreNum');
+  const barEl = document.getElementById('scoreBar');
+  const titleEl = document.getElementById('scoreTitle');
+  const descEl = document.getElementById('scoreDesc');
+  const badgeEl = document.getElementById('scoreBadge');
+
+  const circumference = 239;
+  const offset = circumference - (score / 100) * circumference;
+  circle.style.strokeDashoffset = offset;
+
+  if (score >= 75) {
+    circle.style.stroke = 'var(--score-green)';
+    barEl.style.background = 'var(--score-green)';
+    titleEl.textContent = 'Strong ATS Match';
+    descEl.textContent = 'Your resume aligns well with the job description. Ready to submit!';
+  } else if (score >= 50) {
+    circle.style.stroke = 'var(--score-yellow)';
+    barEl.style.background = 'var(--score-yellow)';
+    titleEl.textContent = 'Moderate ATS Match';
+    descEl.textContent = 'Good alignment but some key skills are missing. Check the optimized resume.';
+  } else {
+    circle.style.stroke = 'var(--score-red)';
+    barEl.style.background = 'var(--score-red)';
+    titleEl.textContent = 'Low ATS Match';
+    descEl.textContent = 'Significant keyword gaps detected. The optimizer has improved your resume substantially.';
+  }
+
+  barEl.style.width = score + '%';
+  badgeEl.textContent = score + ' / 100';
+
+  let count = 0;
+  const interval = setInterval(() => {
+    count = Math.min(count + Math.ceil(score / 40), score);
+    numEl.textContent = count;
+    if (count >= score) clearInterval(interval);
+  }, 30);
+}
+
+// ── KEYWORDS ──
+function renderKeywords(matched, missing) {
+  const m = document.getElementById('kwMatched');
+  const x = document.getElementById('kwMissing');
+  m.innerHTML = matched.length
+    ? matched.map(k => `<span class="kw-tag match">✓ ${k}</span>`).join('')
+    : '<span style="color:var(--muted);font-size:12px;font-family:\'DM Mono\',monospace">None found</span>';
+  x.innerHTML = missing.length
+    ? missing.map(k => `<span class="kw-tag miss">✗ ${k}</span>`).join('')
+    : '<span style="color:var(--score-green);font-size:12px;font-family:\'DM Mono\',monospace">All keywords present! 🎉</span>';
+}
+
+// ── DOWNLOAD ──
+function downloadFile(type, fmt='docx') {
+  if (!currentData) { showToast('Run the pipeline first', 'error'); return; }
+  const urlKey = type === 'resume' ? 'resume_download_url' : 'cover_letter_download_url';
+  const contentKey = type === 'resume' ? 'optimized_resume' : 'cover_letter';
+
+  if (currentData[urlKey]) {
+    window.open(backendBase + currentData[urlKey], '_blank');
+    return;
+  }
+  // Fallback: download plain text
+  const content = currentData[contentKey] || '';
+  const blob = new Blob([content], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = type + '_optimized.' + fmt;
+  a.click();
+  showToast('Downloaded as ' + fmt.toUpperCase(), 'success');
+}
+
+// ── COPY ──
+function copyText(id) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!', 'success'));
+}
+
+// ── RESET ──
+function resetAll() {
+  document.getElementById('resumeFile').value = '';
+  document.getElementById('jdFile').value = '';
+  document.getElementById('jdText').value = '';
+  document.getElementById('resumeName').style.display = 'none';
+  document.getElementById('jdName').style.display = 'none';
+  document.getElementById('resumeContent').textContent = 'Resume will appear here after optimization...';
+  document.getElementById('coverContent').textContent = 'Cover letter will appear here after optimization...';
+  document.getElementById('resumeDownloadBar').style.display = 'none';
+  document.getElementById('coverDownloadBar').style.display = 'none';
+  document.getElementById('resumeLog').innerHTML = '';
+  document.getElementById('resumeLog').classList.remove('show');
+  document.getElementById('scoreNum').textContent = '—';
+  document.getElementById('scoreBar').style.width = '0';
+  document.getElementById('scoreCircle').style.strokeDashoffset = '239';
+  document.getElementById('scoreBadge').textContent = '—';
+  document.getElementById('scoreTitle').textContent = 'Run the pipeline first';
+  document.getElementById('scoreDesc').textContent = 'Upload your resume and job description, then click Analyze.';
+  document.getElementById('kwMatched').innerHTML = '<span style="color:var(--muted);font-size:12px;font-family:\'DM Mono\',monospace">Run analysis to see results</span>';
+  document.getElementById('kwMissing').innerHTML = '<span style="color:var(--muted);font-size:12px;font-family:\'DM Mono\',monospace">Run analysis to see results</span>';
+  currentData = {};
+  setPipeStep(1);
+  setStatus('');
+  showToast('Reset complete', '');
+}
+
+// ── CONFIG ──
+function openConfig() {
+  document.getElementById('cfgBackend').value = backendBase;
+  document.getElementById('cfgGroqKey').value = groqKey;
+  document.getElementById('configModal').classList.add('show');
+}
+function closeConfig() { document.getElementById('configModal').classList.remove('show'); }
+function saveConfig() {
+  backendBase = document.getElementById('cfgBackend').value.replace(/\/+$/, '');
+  groqKey = document.getElementById('cfgGroqKey').value;
+  localStorage.setItem('backendUrl', backendBase);
+  if (groqKey) localStorage.setItem('groqKey', groqKey);
+  document.getElementById('backendUrl').textContent = backendBase;
+  closeConfig();
+  showToast('Config saved!', 'success');
+}
+
+// ── TOAST ──
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => { t.classList.remove('show'); }, 3000);
+}
+
+// ── LLM PROVIDER CHANGE ──
+document.getElementById('llmProvider').addEventListener('change', function() {
+  const models = {
+    groq: ['llama-3.1-70b-versatile','llama-3.1-8b-instant','mixtral-8x7b-32768','gemma2-9b-it'],
+    ollama: ['llama3.1','llama3','mistral','phi3'],
+    huggingface: ['meta-llama/Llama-3.1-70B','mistralai/Mixtral-8x7B-Instruct-v0.1']
+  };
+  const sel = document.getElementById('llmModel');
+  sel.innerHTML = (models[this.value] || []).map(m => `<option value="${m}">${m}</option>`).join('');
+});
+
+// ── UTILS ──
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Close modal on overlay click
+document.getElementById('configModal').addEventListener('click', function(e) {
+  if (e.target === this) closeConfig();
+});
+</script>
+</body>
+</html>
