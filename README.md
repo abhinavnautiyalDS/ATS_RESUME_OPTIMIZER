@@ -2,6 +2,9 @@
 
 > A production-quality GenAI system that converts any resume + job description into an ATS-optimized resume and tailored cover letter — using 100% open-source models.
 
+<img width="1918" height="2888" alt="image" src="https://github.com/user-attachments/assets/60fd0e52-d3c3-4978-8fc0-8fe07c80d35d" />
+
+
 ---
 
 ## 📐 System Architecture
