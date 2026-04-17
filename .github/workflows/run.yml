@@ -1,26 +1,22 @@
-name: Run AI Project
+name: Run Backend
 
 on: push
 
 jobs:
-  run-project:
+  run-backend:
     runs-on: ubuntu-latest
 
-    env:
-      HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}
-      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-
     steps:
-      - name: Checkout Repo
+      - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Install Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r ATS_RESUME_OPTIMIZER/backend/requirements.txt
 
-      - name: Run script
-        run: python main.py
+      - name: Run backend
+        run: python ATS_RESUME_OPTIMIZER/backend/main.py
