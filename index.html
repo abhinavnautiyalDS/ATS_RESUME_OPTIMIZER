@@ -940,19 +940,35 @@ async function startPipeline() {
     addLog('Starting ATS optimization pipeline...');
     addLog('Uploading resume: ' + resumeFile.name);
 
+    // const formData = new FormData();
+    // formData.append('resume_file', resumeFile);
+    // if (jdFile) {
+    //   formData.append('job_description', jdFile);
+    //   addLog('Uploading JD: ' + jdFile.name);
+    // }
+    // if (jdText) {
+    //   formData.append('job_description_text', jdText);
+    //   addLog('Using pasted job description text');
+    // }
+    // formData.append('llm_provider', document.getElementById('llmProvider').value);
+    // formData.append('model', document.getElementById('llmModel').value);
+    // formData.append('output_format', document.getElementById('outputFmt').value);
+
+
+
     const formData = new FormData();
+
     formData.append('resume_file', resumeFile);
-    if (jdFile) {
-      formData.append('job_description', jdFile);
-      addLog('Uploading JD: ' + jdFile.name);
-    }
+    
     if (jdText) {
-      formData.append('job_description_text', jdText);
-      addLog('Using pasted job description text');
+      formData.append('job_description', jdText);
     }
+    
     formData.append('llm_provider', document.getElementById('llmProvider').value);
     formData.append('model', document.getElementById('llmModel').value);
     formData.append('output_format', document.getElementById('outputFmt').value);
+
+    
     if (groqKey) formData.append('groq_api_key', groqKey);
 
     // STEP 2: Parse
