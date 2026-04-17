@@ -17,7 +17,8 @@ class Settings(BaseSettings):
     # LLM Provider Configuration
     # Supports: "huggingface" | "ollama" | "groq" (free tier)
     # -----------------------------------------------------------------------
-    LLM_PROVIDER: str = Field(default="huggingface", description="LLM backend provider")
+    # LLM_PROVIDER: str = Field(default="huggingface", description="LLM backend provider")
+    LLM_PROVIDER: str = Field(default="groq", description="LLM backend provider")
 
     # HuggingFace Inference API (free tier available)
  
