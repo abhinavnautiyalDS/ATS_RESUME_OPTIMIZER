@@ -941,7 +941,7 @@ async function startPipeline() {
     addLog('Uploading resume: ' + resumeFile.name);
 
     const formData = new FormData();
-    formData.append('resume', resumeFile);
+    formData.append('resume_file', resumeFile);
     if (jdFile) {
       formData.append('job_description', jdFile);
       addLog('Uploading JD: ' + jdFile.name);
