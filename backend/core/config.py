@@ -22,8 +22,7 @@ class Settings(BaseSettings):
     # HuggingFace Inference API (free tier available)
  
  
-    HF_API_TOKEN = os.getenv("HF_API_TOKEN")
-
+    HF_API_TOKEN: str = Field(default="")
     HF_API_URL: str = Field(
         default="https://api-inference.huggingface.co/models",
         description="HuggingFace Inference API base URL",
@@ -40,8 +39,7 @@ class Settings(BaseSettings):
     )
 
     # Groq (free-tier cloud inference for open-source models)
-    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-
+    GROQ_API_KEY: str = Field(default="")
     GROQ_API_URL: str = Field(
         default="https://api.groq.com/openai/v1/chat/completions",
         description="Groq OpenAI-compatible endpoint",
