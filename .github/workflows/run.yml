@@ -13,10 +13,10 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.10"a
 
       - name: Install dependencies
-        run: pip install -r ATS_RESUME_OPTIMIZER/backend/requirements.txt
+        run: pip install -r backend/requirements.txt
 
       - name: Run backend
-        run: python ATS_RESUME_OPTIMIZER/backend/main.py
+        run: python ATS_RESUME_backend/main.py
